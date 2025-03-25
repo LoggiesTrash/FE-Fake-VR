@@ -1,0 +1,81 @@
+-- Replace these with your alt usernames
+local altUsernames = {
+	Head = "YourAltRobloxUsername", -- Controller
+	Torso = "YourAltRobloxUsername", -- Your Head
+	LeftArm = "YourAltRobloxUsername", -- Your Left Arm
+	RightArm = "YourAltRobloxUsername", -- Your Right Arm
+}
+
+local mechParts = {
+	workspace[altUsernames.Torso],
+	workspace[altUsernames.RightArm],
+	workspace[altUsernames.LeftArm]
+}
+
+local attachments = {
+	{redBlock = workspace[altUsernames.Torso].HumanoidRootPart, blueCube = workspace[altUsernames.Head].Torso, offset = CFrame.new(0, 10, 10) * CFrame.Angles(math.rad(-25), math.rad(0), math.rad(0))},
+	{redBlock = workspace[altUsernames.RightArm].HumanoidRootPart, blueCube = workspace[altUsernames.Head]["Right Arm"], offset = CFrame.new(5, 2, 6) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(0))},
+	{redBlock = workspace[altUsernames.LeftArm].HumanoidRootPart, blueCube = workspace[altUsernames.Head]["Left Arm"], offset = CFrame.new(-5, 2, 6) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(0))}
+}
+
+local function applyZeroGravity()
+	for _, mech in ipairs(mechParts) do
+		for _, part in ipairs(mech:GetChildren()) do
+			if part:IsA("BasePart") then
+				local bodyForce = part:FindFirstChild("BodyForce") or Instance.new("BodyForce")
+				bodyForce.Force = Vector3.new(0, workspace.Gravity * part:GetMass(), 0)
+				bodyForce.Parent = part
+			end
+		end
+	end
+end
+
+local function updateAttachments()
+	while true do
+		for _, attachment in ipairs(attachments) do
+			local redBlock = attachment.redBlock
+			local blueCube = attachment.blueCube
+			local offset = attachment.offset
+
+			if redBlock and blueCube then
+				local desiredCFrame = blueCube.CFrame:ToWorldSpace(offset)
+				redBlock.CFrame = redBlock.CFrame:Lerp(desiredCFrame, 0.2)
+			else
+				warn("Failed to attach parts: Missing redBlock or blueCube")
+			end
+		end
+		wait(0.02)
+	end
+end
+
+local function flyMechParts()
+	while true do
+		for _, mech in ipairs(mechParts) do
+			for _, part in ipairs(mech:GetChildren()) do
+				if part:IsA("BasePart") then
+					local bodyVelocity = part:FindFirstChild("BodyVelocity") or Instance.new("BodyVelocity")
+					bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+					bodyVelocity.Velocity = Vector3.new(0, 50, 0)
+					bodyVelocity.Parent = part
+
+					local bodyGyro = part:FindFirstChild("BodyGyro") or Instance.new("BodyGyro")
+					bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+					bodyGyro.CFrame = part.CFrame
+					bodyGyro.Parent = part
+				end
+			end
+		end
+		wait(0.02)
+	end
+end
+
+for _, part in ipairs(mechParts) do
+	if part:FindFirstChild("Humanoid") then
+		part.Humanoid.PlatformStand = true
+	end
+end
+
+applyZeroGravity()
+updateAttachments()
+flyMechParts()
+
