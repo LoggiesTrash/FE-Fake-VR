@@ -78,4 +78,3 @@ end
 applyZeroGravity()
 updateAttachments()
 flyMechParts()
-
